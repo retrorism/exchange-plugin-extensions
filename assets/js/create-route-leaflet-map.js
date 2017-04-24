@@ -156,14 +156,35 @@ function Exchange_LMP_Map( map, autoDraw ) {
         return markers;
     };
     this.createMapLayers = function( leafletObjectInstance ) {
-        var mappable_objects = [];
-        if ( leafletObjectInstance.map_markers && leafletObjectInstance.map_markers.length ) {
+        var mappableObjects = [];
+        if ( null == leafletObjectInstance.map_markers && null == leafletObjectInstance.map_polylines ) {
+            return;
+        }
 
+        if ( leafletObjectInstance.map_markers && leafletObjectInstance.map_markers.length > 0 ) {
+        
         }
-        if ( leafletObjectInstance.map_polylines && leafletObjectInstance.map_polylines.length ) {
-            mappable_objects = mappable_objects.concat( leafletObjectInstance.map_polylines.map( LMP_Map.createNewerRoute ) );
+
+        if ( leafletObjectInstance.map_polylines && leafletObjectInstance.map_polylines.length > 0 ) {
+            for ( var i = 0; leafletObjectInstance.map_polylines.length > i; i++ ) {
+                var cluster = LMP_Map.createNewerRoute( leafletObjectInstance.map_polylines[i] );
+                if ( cluster.hasOwnProperty( '_layers' ) ) {
+                    var addMe = true;
+                    cluster.eachLayer( function( layer ) {
+                        if ( layer.getLatLng().lat == 0 || layer.getLatLng() == 0 ) {
+                            addMe = false;
+                        }
+                    });
+                    if ( addMe ) {
+                        mappableObjects.push( cluster );
+                    }
+                }
+            }
         }
-        return mappable_objects;
+        if ( ! mappableObjects.length > 0 ) {
+            return false;
+        }
+        return mappableObjects;
     };
     this.renderObjects = function( leafletObjectInstance ) {
         if ( leafletObjectInstance == undefined ) {
@@ -198,13 +219,7 @@ function Exchange_LMP_Map( map, autoDraw ) {
         }
         LMP_Map.network = {};
         LMP_Map.networkShowing = 0;
-        var groups = [];
-        LMP_Map.createMapLayers( leafletObjectInstance ).map( function( group ) {
-            if ( group ) {
-                console.log( group );
-                groups.push( group );
-            }
-        })
+        var groups = LMP_Map.createMapLayers( leafletObjectInstance );
         if ( groups.length > 0 ) {
             LMP_Map.clusterLayer.addLayers( groups );
         }
