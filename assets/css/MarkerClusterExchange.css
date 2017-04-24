@@ -1,0 +1,48 @@
+.simplemap .leaflet-tooltip {
+	min-width: 30em;
+}
+
+.simplemap .leaflet-popup-content-wrapper {
+	border-radius: 0;
+	padding: 0.5em;
+	background: #fff;
+}
+
+.simplemap--network .leaflet-popup-content {
+	margin: 0;
+	min-width: 300px;
+	overflow: hidden;
+}
+
+.map__popup__link--image {
+	display: block;
+	width: 10em;
+	height: auto;
+	float: left;
+	margin-right: 0.5em;
+}
+
+.map__popup__info {
+	overflow: hidden;
+	white-space: pre-wrap
+}
+
+.map__popup__info-inner {
+	min-width: 18em;
+}
+
+.map__popup__title {
+	color: #444;
+	font-size: 1.2em;
+}
+
+.map__popup__info .participants {
+	margin-bottom: 0;
+}
+.map__popup__info .participant__name {
+	display: block;
+	font-weight: 400;
+}
+.map__popup__info .participant__organisation-details {
+	font-weight: 300;
+}
