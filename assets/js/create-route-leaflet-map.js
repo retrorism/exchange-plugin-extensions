@@ -201,6 +201,7 @@ function Exchange_LMP_Map( map, autoDraw ) {
         var groups = [];
         LMP_Map.createMapLayers( leafletObjectInstance ).map( function( group ) {
             if ( group ) {
+                console.log( group );
                 groups.push( group );
             }
         })
