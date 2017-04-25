@@ -167,7 +167,7 @@ if ( ! class_exists( 'Exchange_Plugin_Extension' ) ) {
             }
             add_action( 'wp_head', array( $this, 'scripts_and_styles_to_head' ) );
             add_action( 'plugins_loaded', array( $this, 'core_hooks' ), 99 );
-            add_action( 'plugins_loaded', array( $this, 'script_and_style_hooks'), 99 );
+            add_action( 'wp_enqueue_scripts', array( $this, 'script_and_style_hooks'), 99 );
         }
     } // END class
 
