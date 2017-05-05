@@ -86,7 +86,7 @@ if ( ! class_exists( 'Exchange_Plugin_Extension' ) ) {
             }
         }
 
-        public function get_exchange_options( $option_name ) {
+        public function get_exchange_options( $option_name = '' ) {
             if ( empty( $option_name ) ) {
                 return $this->exchange_options;
             } elseif ( array_key_exists( $option_name, $this->exchange_options ) ) {
