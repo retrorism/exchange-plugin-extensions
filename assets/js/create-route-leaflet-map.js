@@ -99,6 +99,9 @@ function Exchange_LMP_Map( map, autoDraw ) {
         return html;
     }
     this.createMarker = function( participant ) {
+        if ( participant.locations == undefined ) {
+            return false;
+        }
         var marker = L.marker( participant.locations[0].latlngs, {
             icon : new L.DivIcon({
                 className: 'map__marker',
@@ -186,7 +189,7 @@ function Exchange_LMP_Map( map, autoDraw ) {
             for ( var i = 0; leafletObjectInstance.map_markers.length > i; i++ ) {
                 var marker = LMP_Map.createMarker( leafletObjectInstance.map_markers[i] );
                 var addMe = true;
-                if ( marker.getLatLng().lat == 0 || marker.getLatLng() == 0 ) {
+                if ( ! marker || marker.getLatLng().lat == 0 || marker.getLatLng() == 0 ) {
                     addMe = false;
                 }
                 if ( addMe ) {
