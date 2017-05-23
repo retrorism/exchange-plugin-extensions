@@ -98,6 +98,27 @@ function Exchange_LMP_Map( map, autoDraw ) {
         
         return html;
     }
+    this.createMarker = function( participant ) {
+        var marker = L.marker( participant.locations[0].latlngs, {
+            icon : new L.DivIcon({
+                className: 'map__marker',
+                html:   '<img class="map__marker__image" src="' + iconUrl + '">'
+            })
+        });
+        marker.exchangeDetails = {
+            title: participant.title,
+            link: participant.link,
+            image: participant.image
+        }
+        if ( marker ) {
+            marker.exchangeDetails.popup = L.popup().setContent( LMP_Map.createPopup( marker.exchangeDetails ), {
+                className : "map__popup"
+            } );
+            marker.bindPopup( marker.exchangeDetails.popup );
+            return marker;
+        }
+    }
+
     this.createNewerRoute = function( collaboration ) {
         var markers = L.featureGroup(),
         leaflet_ids = [];
@@ -162,9 +183,17 @@ function Exchange_LMP_Map( map, autoDraw ) {
         }
 
         if ( leafletObjectInstance.map_markers && leafletObjectInstance.map_markers.length > 0 ) {
-        
+            for ( var i = 0; leafletObjectInstance.map_markers.length > i; i++ ) {
+                var marker = LMP_Map.createMarker( leafletObjectInstance.map_markers[i] );
+                var addMe = true;
+                if ( marker.getLatLng().lat == 0 || marker.getLatLng() == 0 ) {
+                    addMe = false;
+                }
+                if ( addMe ) {
+                    mappableObjects.push( marker );
+                }
+            }   
         }
-
         if ( leafletObjectInstance.map_polylines && leafletObjectInstance.map_polylines.length > 0 ) {
             for ( var i = 0; leafletObjectInstance.map_polylines.length > i; i++ ) {
                 var cluster = LMP_Map.createNewerRoute( leafletObjectInstance.map_polylines[i] );

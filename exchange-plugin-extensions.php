@@ -167,9 +167,14 @@ if ( ! class_exists( 'Exchange_Plugin_Extension' ) ) {
             }
             add_action( 'wp_head', array( $this, 'scripts_and_styles_to_head' ) );
             add_action( 'plugins_loaded', array( $this, 'core_hooks' ), 99 );
-
+            if ( method_exists( $this, 'admin_script_and_style_hooks' ) ) {
+                add_action( 'admin_enqueue_scripts', array( $this, 'admin_script_and_style_hooks'), 99 );
+            }
             if ( method_exists( $this, 'script_and_style_hooks' ) ) {
                 add_action( 'wp_enqueue_scripts', array( $this, 'script_and_style_hooks'), 99 );
+            }
+            if ( method_exists( $this, 'admin_options' ) ) {
+                add_action( 'admin_init', array( &$this, 'admin_options' ) );
             }
         }
     } // END class

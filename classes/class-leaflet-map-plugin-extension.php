@@ -9,13 +9,246 @@
 if ( ! class_exists( 'Leaflet_Map_Plugin_Extension' ) ) {
     /**
      * Leaflet_Map_Extension Class
-     *
+     * 
      * @package exchange-plugin-extensions
      * @author Willem Prins <willem@somtijds.nl>
      **/ 
     class Leaflet_Map_Plugin_Extension extends Exchange_Plugin_Extension {
 
         public $required_plugins = array( 'leaflet-map' => 'https://wordpress.org/plugins/leaflet-map/' );
+
+        /**
+         * Add options to customies Leaflet styles
+         *
+         * @link https://code.tutsplus.com/articles/how-to-use-wordpress-color-picker-api--wp-33067
+         * @return void
+         * @author 
+         **/
+        public function admin_options() {
+            if ( ! defined( 'EXCHANGE_PLUGIN' ) || ! is_admin() ) {
+                return;
+            }
+
+            add_settings_field(
+                    'leaflet_icon_url',
+                __( 'Icon for map markers', EXCHANGE_PLUGIN ),
+                array( &$this, 'leaflet_icon_url_cb' ),
+                EXCHANGE_PLUGIN,
+                EXCHANGE_PLUGIN . '_general',
+                array( 'label_for' => 'leaflet_icon_url' )
+            );
+            add_settings_field(
+                    'leaflet_line_color',
+                __( 'Color for lines rendered in maps', EXCHANGE_PLUGIN ),
+                array( &$this, 'leaflet_line_color_cb' ),
+                EXCHANGE_PLUGIN,
+                EXCHANGE_PLUGIN . '_general',
+                array( 'label_for' => 'leaflet_line_color' )
+            );
+            add_settings_field(
+                    'leaflet_cluster_small_color',
+                __( 'Color for small clusters', EXCHANGE_PLUGIN ),
+                array( &$this, 'leaflet_cluster_small_color_cb' ),
+                EXCHANGE_PLUGIN,
+                EXCHANGE_PLUGIN . '_general',
+                array( 'label_for' => 'leaflet_cluster_small_color' )
+            );
+            add_settings_field(
+                    'leaflet_cluster_medium_color',
+                __( 'Color for medium clusters', EXCHANGE_PLUGIN ),
+                array( &$this, 'leaflet_cluster_medium_color_cb' ),
+                EXCHANGE_PLUGIN,
+                EXCHANGE_PLUGIN . '_general',
+                array( 'label_for' => 'leaflet_cluster_medium_color' )
+            );
+            add_settings_field(
+                    'leaflet_cluster_large_color',
+                __( 'Color for large clusters', EXCHANGE_PLUGIN ),
+                array( &$this, 'leaflet_cluster_large_color_cb' ),
+                EXCHANGE_PLUGIN,
+                EXCHANGE_PLUGIN . '_general',
+                array( 'label_for' => 'leaflet_cluster_large_color' )
+            );
+            add_settings_field(
+                    'leaflet_cluster_small_div_color',
+                __( 'Color for small cluster divs', EXCHANGE_PLUGIN ),
+                array( &$this, 'leaflet_cluster_small_div_color_cb' ),
+                EXCHANGE_PLUGIN,
+                EXCHANGE_PLUGIN . '_general',
+                array( 'label_for' => 'leaflet_cluster_small_div_color' )
+            );
+            add_settings_field(
+                    'leaflet_cluster_medium_div_color',
+                __( 'Color for medium cluster divs', EXCHANGE_PLUGIN ),
+                array( &$this, 'leaflet_cluster_medium_div_color_cb' ),
+                EXCHANGE_PLUGIN,
+                EXCHANGE_PLUGIN . '_general',
+                array( 'label_for' => 'leaflet_cluster_medium_div_color' )
+            );
+            add_settings_field(
+                    'leaflet_cluster_large_div_color',
+                __( 'Color for large cluster divs', EXCHANGE_PLUGIN ),
+                array( &$this, 'leaflet_cluster_large_div_color_cb' ),
+                EXCHANGE_PLUGIN,
+                EXCHANGE_PLUGIN . '_general',
+                array( 'label_for' => 'leaflet_cluster_large_div_color' )
+            );
+            register_setting( EXCHANGE_PLUGIN, 'leaflet_icon_url', array( &$this, 'exchange_sanitize_url' ) );
+            register_setting( EXCHANGE_PLUGIN, 'leaflet_line_color', array( &$this, 'exchange_sanitize_hex_color' ) );
+            register_setting( EXCHANGE_PLUGIN, 'leaflet_cluster_small_color', array( &$this, 'exchange_sanitize_hex_color' ) );
+            register_setting( EXCHANGE_PLUGIN, 'leaflet_cluster_medium_color', array( &$this, 'exchange_sanitize_hex_color' ) );
+            register_setting( EXCHANGE_PLUGIN, 'leaflet_cluster_large_color', array( &$this, 'exchange_sanitize_hex_color' ) );
+            register_setting( EXCHANGE_PLUGIN, 'leaflet_cluster_small_div_color', array( &$this, 'exchange_sanitize_hex_color' ) );
+            register_setting( EXCHANGE_PLUGIN, 'leaflet_cluster_medium_div_color', array( &$this, 'exchange_sanitize_hex_color' ) );
+            register_setting( EXCHANGE_PLUGIN, 'leaflet_cluster_large_div_color', array( &$this, 'exchange_sanitize_hex_color' ) );
+        }
+
+        /**
+         * Function that will check if value is a valid HEX color.
+         */
+        public function exchange_sanitize_hex_color( $value ) { 
+             
+            if ( preg_match( '/^#[a-f0-9]{6}$/i', $value ) ) { // if user insert a HEX color with #     
+                return $value;
+            } 
+            return false;
+
+        }
+
+        /**
+         * Function that will check if value is a valid URL
+         * @todo actually sanitize
+         */
+        public function exchange_sanitize_url( $value ) { 
+             
+            return esc_url_raw( $value );
+
+        }
+
+        /**
+         * Render an URL field
+         *
+         * @since  0.1.0
+         */
+        function leaflet_icon_url_cb() {
+            
+            $stored  = get_option( 'leaflet_icon_url_cb' );
+            $val = ! empty( $stored ) ? $stored : $this->exchange_options['leaflet_icon_url'];
+            ?>
+            <fieldset>
+                <label for="leaflet_icon_url_cb">
+                    <?php _e( 'Pick an icon url', EXCHANGE_PLUGIN ); ?>
+                </label>
+                <input type="text" size="120"
+                    name="leaflet_icon_url"
+                    id="leaflet_icon_url"
+                    <?php if ( ! empty( $val ) ) : ?>
+                    value="<?php echo $val; ?>"
+                    <?php else : ?>
+                    placeholder="<?php _e('Add a valid image URL here', EXCHANGE_PLUGIN ); ?>"
+                    <?php endif; ?>
+            </fieldset>
+            <?php
+
+        }
+
+        /**
+         * Render colorbox for this option
+         *
+         * @since  0.1.0
+         */
+        function exchange_render_color_box( $option_name ) {
+            $stored = get_option( EXCHANGE_PLUGIN . $option_name );
+            $val = ! empty( $stored ) ? $stored : $this->exchange_options[ $option_name ];
+            ?>
+
+            <fieldset>
+                <label for="<?php echo $option_name ?>">
+                    <?php echo wp_sprintf( __( 'Pick a color for %s', EXCHANGE_PLUGIN ), $option_name); ?>
+                </label>
+                 <input
+                    size="8"
+                    type="text" 
+                    name="<?php echo $option_name; ?>" 
+                    <?php if ( ! empty( $val ) ) : ?>
+                    value="<?php echo $val; ?>"
+                    <?php else : ?>
+                    placeholder="<?php _e('#ff00ff', EXCHANGE_PLUGIN ); ?>"
+                    <?php endif; ?>
+                    class="lmpe-color-picker" >
+            </fieldset>
+            <?php
+        }
+
+        /**
+         * Render colorbox for this option
+         *
+         * @since  0.1.0
+         */
+        function leaflet_line_color_cb() {
+            $option_name = 'leaflet_line_color';
+            $this->exchange_render_color_box( $option_name );
+        }
+
+        /**
+         * Render colorbox for this option
+         *
+         * @since  0.1.0
+         */
+        function leaflet_cluster_small_color_cb() {
+            $option_name = 'leaflet_cluster_small_color';
+            $this->exchange_render_color_box( $option_name );
+        }
+
+        /**
+         * Render colorbox for this option
+         *
+         * @since  0.1.0
+         */
+        function leaflet_cluster_medium_color_cb() {
+            $option_name = 'leaflet_cluster_medium_color';
+            $this->exchange_render_color_box( $option_name );
+        }
+
+        /**
+         * Render colorbox for this option
+         *
+         * @since  0.1.0
+         */
+        function leaflet_cluster_large_color_cb() {
+            $option_name = 'leaflet_cluster_large_color';
+            $this->exchange_render_color_box( $option_name );
+        }
+
+        /**
+         * Render colorbox for this option
+         *
+         * @since  0.1.0
+         */
+        function leaflet_cluster_small_div_color_cb() {
+            $option_name = 'leaflet_cluster_small_div_color';
+            $this->exchange_render_color_box( $option_name );
+        }
+
+        /**
+         * Render colorbox for this option
+         *
+         * @since  0.1.0
+         */
+        function leaflet_cluster_medium_div_color_cb() {
+            $option_name = 'leaflet_cluster_medium_div_color';
+            $this->exchange_render_color_box( $option_name );
+        }
+
+        /**
+         * Render colorbox for this option
+         *
+         * @since  0.1.0
+         */
+        function leaflet_cluster_large_div_color_cb() {
+            $option_name = 'leaflet_cluster_large_div_color';
+            $this->exchange_render_color_box( $option_name );
+        }
 
         public function exchange_default_options() {
             $this->exchange_options = array(
@@ -85,6 +318,13 @@ if ( ! class_exists( 'Leaflet_Map_Plugin_Extension' ) ) {
             add_shortcode( 'leaflet-layers', array( $this, 'layers_shortcode' ) );
             remove_filter( 'plugin_action_links_leaflet-map', array( 'Leaflet_Map_Plugin', 'plugin_action_links' ) );
             $this->set_exchange_options();
+        }
+
+        public function admin_script_and_style_hooks() {
+            // Make sure to add the wp-color-picker dependecy to js file
+            wp_enqueue_script( 'lmpe_custom_js', plugins_url( '/assets/js/jquery.colorpicker.js', __FILE__ ), array( 'jquery', 'wp-color-picker' ), '', true  );
+            // Css rules for Color Picker
+            wp_enqueue_style( 'wp-color-picker' );
         }
 
         public function script_and_style_hooks() {
