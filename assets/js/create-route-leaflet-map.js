@@ -49,8 +49,40 @@ function Exchange_LMP_Map( map, autoDraw ) {
         iconUrl = leaflet_vars.leaflet_icon_url ? leaflet_vars.leaflet_icon_url : 'https://unpkg.com/leaflet@1.0.3/dist/images/marker-icon.png',
         iconSize = leaflet_vars.leaflet_icon_size ? leaflet_vars.leaflet_icon_size : [14, 14],
         iconAnchor = leaflet_vars.leaflet_icon_anchor ? leaflet_vars.leaflet_icon_anchor : [7, 7],
-        lineColor = leaflet_vars.leaflet_line_color ? leaflet_vars.leaflet_line_color : 'red';
-    
+        lineColor = leaflet_vars.leaflet_line_color ? leaflet_vars.leaflet_line_color : 'red',
+        clusterIconWidth = leaflet_vars.leaflet_cluster_icon_pixel_width ? leaflet_vars.leaflet_cluster_icon_pixel_width : 0,
+        clusterSingleMarkerMode = false;
+        clusterMarkerOptions = {
+            showCoverageOnHover : false,
+            singleMarkerMode : false,
+            spiderLegPolylineOptions : {
+                color : lineColor
+            },
+            iconCreateFunction: function ( cluster ) {
+                var childCount = cluster.getChildCount();
+                var c = ' marker-cluster-';
+                if (childCount < 10) {
+                    c += 'small';
+                } else if (childCount < 100) {
+                    c += 'medium';
+                } else {
+                    c += 'large';
+                }
+                return new L.DivIcon({ html: '<div><span>' + childCount + '</span></div>', className: 'marker-cluster' + c, iconSize: new L.Point(clusterIconWidth, clusterIconWidth) });
+            }
+        };
+        if ( -1 == clusterIconWidth ) {
+            clusterSingleMarkerMode = true;
+            clusterMarkerOptions.singleMarkerMode = true;
+            clusterMarkerOptions.iconCreateFunction = function () {
+                var className = 'map__marker';
+                return L.divIcon({
+                    html: '<img class=\"map__marker__image\" src=\"' + iconUrl + '\">',
+                    className: className
+                });
+            };
+        }
+
     if ( undefined == autoDraw ) {
         this.autoDraw = false;
     } else {
@@ -114,7 +146,10 @@ function Exchange_LMP_Map( map, autoDraw ) {
             image: participant.image
         }
         if ( marker ) {
-            marker.exchangeDetails.popup = L.popup().setContent( LMP_Map.createPopup( marker.exchangeDetails ), {
+            marker.exchangeDetails.popup = L.popup({
+            maxWidth: 400,
+            minWidth: 300,
+        }).setContent( LMP_Map.createPopup( marker.exchangeDetails ), {
                 className : "map__popup"
             } );
             marker.bindPopup( marker.exchangeDetails.popup );
@@ -165,7 +200,10 @@ function Exchange_LMP_Map( map, autoDraw ) {
             }
         }
 
-        markers.exchangeDetails.popup = L.popup().setContent( LMP_Map.createPopup( markers.exchangeDetails ), {
+        markers.exchangeDetails.popup = L.popup({
+            maxWidth: 400,
+            minWidth: 300,
+        }).setContent( LMP_Map.createPopup( markers.exchangeDetails ), {
             className : "map__popup"
         } );
         if ( markers.exchangeDetails.partners.length > 1 ) {
@@ -234,13 +272,8 @@ function Exchange_LMP_Map( map, autoDraw ) {
             lineColor = leaflet_vars.leaflet_line_color;
         }
         LMP_Map.map.getContainer().classList.remove('focus');
-        if ( LMP_Map.clusterLayer == undefined ) {
-            LMP_Map.clusterLayer = new L.markerClusterGroup({
-                showCoverageOnHover : false,
-                spiderLegPolylineOptions : {
-                    color : lineColor
-                }
-            });
+        if ( LMP_Map.markerClusterGroupLayer == undefined ) {
+            LMP_Map.clusterLayer = new L.markerClusterGroup( clusterMarkerOptions );
         } else {
             LMP_Map.clusterLayer.clearLayers();
         }

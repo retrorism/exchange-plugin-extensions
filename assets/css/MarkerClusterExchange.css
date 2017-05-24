@@ -1,5 +1,5 @@
 .simplemap .leaflet-tooltip {
-	min-width: 30em;
+	width: 25em;
 }
 
 .simplemap .leaflet-popup-content-wrapper {
@@ -8,27 +8,28 @@
 	background: #fff;
 }
 
-.simplemap--network .leaflet-popup-content {
+.simplemap .leaflet-popup-content {
 	margin: 0;
-	min-width: 300px;
 	overflow: hidden;
 }
 
 .map__popup__link--image {
+	float: left;
 	display: block;
 	width: 10em;
-	height: auto;
-	float: left;
 	margin-right: 0.5em;
+	height: auto;
 }
 
 .map__popup__info {
+	float: left;
 	overflow: hidden;
-	white-space: pre-wrap
+	white-space: pre-wrap;
+	max-width: 13.3em;
 }
 
 .map__popup__info-inner {
-	min-width: 18em;
+
 }
 
 .map__popup__title {
