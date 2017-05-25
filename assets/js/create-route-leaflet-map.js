@@ -91,6 +91,9 @@ function Exchange_LMP_Map( map, autoDraw ) {
     this.map = map;
     this.createPopup = function( data ) {
         var html = '';
+        if ( undefined != data.type ) {
+            html += '<div class="map__popup__content-border ' + data.type + '">';
+        }
         if ( undefined != data.link ) {
             html += '<a class="map__popup__link--image" href="' + data.link + '">'
         }
@@ -106,11 +109,16 @@ function Exchange_LMP_Map( map, autoDraw ) {
             html += '<a href="' + data.link + '">'
         }
         if ( undefined != data.title ) {
-            html += '<h5 class="map__popup__title">' + data.title + '</h5>';
+            var titleString = data.title;
+            if ( undefined != data.country ) {
+                titleString += '<span class="map__popup__title__addition">' + data.country.toUpperCase() + '</span>';
+            }
+            html += '<h5 class="map__popup__title">' + titleString + '</h5>';
         }
         if ( undefined != data.link ) {
             html += '</a>';
         }
+
         if ( undefined != data.partners ) {
             html += '<ul class="participants">'
             data.partners.map( function( p ) {
@@ -127,6 +135,9 @@ function Exchange_LMP_Map( map, autoDraw ) {
             html += '</ul>';
         }
         html += '</div></div>';
+        if ( undefined != data.participant_type ) {
+            html += '</div>';
+        }
         
         return html;
     }
@@ -143,12 +154,14 @@ function Exchange_LMP_Map( map, autoDraw ) {
         marker.exchangeDetails = {
             title: participant.title,
             link: participant.link,
-            image: participant.image
+            image: participant.image,
+            country: participant.locations[0].country,
+            type: participant.locations[0].participant_type
         }
         if ( marker ) {
             marker.exchangeDetails.popup = L.popup({
             maxWidth: 400,
-            minWidth: 300,
+            minWidth: 250,
         }).setContent( LMP_Map.createPopup( marker.exchangeDetails ), {
                 className : "map__popup"
             } );

@@ -343,7 +343,7 @@ if ( ! class_exists( 'Leaflet_Map_Plugin_Extension' ) ) {
                     height: ' . ( $this->get_exchange_options('leaflet_cluster_icon_pixel_width') - 4 ) .'px;
                     margin-left: 2px;
                     margin-top: 2px;
-
+                    color: ' . $this->get_exchange_options('leaflet_line_color') . ';
                     text-align: center;
                     border-radius: ' . ( $this->get_exchange_options('leaflet_cluster_icon_pixel_width') - 4 ) / 2 . 'px;
                     font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
