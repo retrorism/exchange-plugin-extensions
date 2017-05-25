@@ -145,10 +145,15 @@ function Exchange_LMP_Map( map, autoDraw ) {
         if ( participant.locations == undefined ) {
             return false;
         }
+        var markerClass = '';
+        if ( undefined != participant.locations[0].participant_type ) {
+            markerClass += ' ' + participant.locations[0].participant_type;
+        }
+        var iconHtml = '<div class="map__marker__image' + markerClass + '" style="background-image: url(' + iconUrl + '); background-size: 100% auto;"></div>';
         var marker = L.marker( participant.locations[0].latlngs, {
             icon : new L.DivIcon({
                 className: 'map__marker',
-                html:   '<img class="map__marker__image" src="' + iconUrl + '">'
+                html:   iconHtml
             })
         });
         marker.exchangeDetails = {
