@@ -290,7 +290,7 @@ function Exchange_LMP_Map( map, autoDraw ) {
             lineColor = leaflet_vars.leaflet_line_color;
         }
         LMP_Map.map.getContainer().classList.remove('focus');
-        if ( LMP_Map.markerClusterGroupLayer == undefined ) {
+        if ( LMP_Map.clusterLayer == undefined ) {
             LMP_Map.clusterLayer = new L.markerClusterGroup( clusterMarkerOptions );
         } else {
             LMP_Map.clusterLayer.clearLayers();
