@@ -400,7 +400,14 @@ if ( ! class_exists( 'Leaflet_Map_Plugin_Extension' ) ) {
 
             //after wp_enqueue_script
             wp_localize_script( 'leaflet_create_route_js', 'leaflet_vars', $translate_this );
-            return Leaflet_Map_Plugin::map_shortcode( $atts );
+            
+            global $leaflet_map_plugin;
+
+            if ( ! $leaflet_map_plugin instanceof Leaflet_Map_Plugin ) {
+                $leaflet_map_plugin = new Leaflet_Map_Plugin();
+            }
+
+            return $leaflet_map_plugin->map_shortcode( $atts );
         }
 
         public function polyline_shortcode ( $atts, $content = null ) {
@@ -411,7 +418,13 @@ if ( ! class_exists( 'Leaflet_Map_Plugin_Extension' ) ) {
                 extract( $atts );
             }
 
-            $style_json = Leaflet_Map_Plugin::get_style_json( $atts );
+            global $leaflet_map_plugin;
+
+            if ( ! $leaflet_map_plugin instanceof Leaflet_Map_Plugin ) {
+                $leaflet_map_plugin = new Leaflet_Map_Plugin();
+            }
+
+            $style_json = $leaflet_map_plugin->get_style_json( $atts );
 
             $fitbounds = empty( $fitbounds ) ? 0 : $fitbounds;
 
@@ -430,7 +443,7 @@ if ( ! class_exists( 'Leaflet_Map_Plugin_Extension' ) ) {
                 $addresses = preg_split( '/\s?[;|\/]\s?/', $addresses );
                 foreach ( $addresses as $address ) {
                     if ( trim( $address ) ) {
-                        $geocoded = Leaflet_Map_Plugin::geocoder( $address );
+                        $geocoded = $leaflet_map_plugin->geocoder( $address );
                         $locations[] = array( $geocoded->{'lat'}, $geocoded->{'lng'} );
                     }
                 }
