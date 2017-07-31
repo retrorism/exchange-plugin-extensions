@@ -289,7 +289,7 @@ function Exchange_LMP_Map( map, autoDraw ) {
             iconUrl = leaflet_vars.leaflet_icon_url;
             lineColor = leaflet_vars.leaflet_line_color;
         }
-        LMP_Map.map.getContainer().classList.remove('focus');
+        /*LMP_Map.map.getContainer().classList.remove('focus');*/
         if ( LMP_Map.clusterLayer == undefined ) {
             LMP_Map.clusterLayer = new L.markerClusterGroup( clusterMarkerOptions );
         } else {
@@ -338,7 +338,7 @@ function Exchange_LMP_Map( map, autoDraw ) {
                     if ( LMP_Map.networkShowing ) {
                         LMP_Map.map.removeLayer( LMP_Map.networkLayer );
                         LMP_Map.map.addLayer( LMP_Map.clusterLayer );
-                        LMP_Map.map.getContainer().classList.remove('focus');
+                        /*LMP_Map.map.getContainer().classList.remove('focus');*/
                         LMP_Map.networkShowing = 0;
                     }
                 })
@@ -354,7 +354,7 @@ function Exchange_LMP_Map( map, autoDraw ) {
             .addLayer( LMP_Map.networkLayer )
             .flyToBounds( LMP_Map.networkLayer.getBounds().pad( 0.033 ) )
             .once('moveend', function( e ) {
-                LMP_Map.map.getContainer().classList.add('focus');
+                /*LMP_Map.map.getContainer().classList.add('focus');*/
                 LMP_Map.showNetwork( layer, false );
                 LMP_Map.networkShowing = 1;
             });
