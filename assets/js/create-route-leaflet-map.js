@@ -49,8 +49,40 @@ function Exchange_LMP_Map( map, autoDraw ) {
         iconUrl = leaflet_vars.leaflet_icon_url ? leaflet_vars.leaflet_icon_url : 'https://unpkg.com/leaflet@1.0.3/dist/images/marker-icon.png',
         iconSize = leaflet_vars.leaflet_icon_size ? leaflet_vars.leaflet_icon_size : [14, 14],
         iconAnchor = leaflet_vars.leaflet_icon_anchor ? leaflet_vars.leaflet_icon_anchor : [7, 7],
-        lineColor = leaflet_vars.leaflet_line_color ? leaflet_vars.leaflet_line_color : 'red';
-    
+        lineColor = leaflet_vars.leaflet_line_color ? leaflet_vars.leaflet_line_color : 'red',
+        clusterIconWidth = leaflet_vars.leaflet_cluster_icon_pixel_width ? leaflet_vars.leaflet_cluster_icon_pixel_width : 0,
+        clusterSingleMarkerMode = false;
+        clusterMarkerOptions = {
+            showCoverageOnHover : false,
+            singleMarkerMode : false,
+            spiderLegPolylineOptions : {
+                color : lineColor
+            },
+            iconCreateFunction: function ( cluster ) {
+                var childCount = cluster.getChildCount();
+                var c = ' marker-cluster-';
+                if (childCount < 10) {
+                    c += 'small';
+                } else if (childCount < 100) {
+                    c += 'medium';
+                } else {
+                    c += 'large';
+                }
+                return new L.DivIcon({ html: '<div><span>' + childCount + '</span></div>', className: 'marker-cluster' + c, iconSize: new L.Point(clusterIconWidth, clusterIconWidth) });
+            }
+        };
+        if ( -1 == clusterIconWidth ) {
+            clusterSingleMarkerMode = true;
+            clusterMarkerOptions.singleMarkerMode = true;
+            clusterMarkerOptions.iconCreateFunction = function () {
+                var className = 'map__marker';
+                return L.divIcon({
+                    html: '<img class=\"map__marker__image\" src=\"' + iconUrl + '\">',
+                    className: className
+                });
+            };
+        }
+
     if ( undefined == autoDraw ) {
         this.autoDraw = false;
     } else {
@@ -59,6 +91,9 @@ function Exchange_LMP_Map( map, autoDraw ) {
     this.map = map;
     this.createPopup = function( data ) {
         var html = '';
+        if ( undefined != data.type ) {
+            html += '<div class="map__popup__content-border ' + data.type + '">';
+        }
         if ( undefined != data.link ) {
             html += '<a class="map__popup__link--image" href="' + data.link + '">'
         }
@@ -74,11 +109,16 @@ function Exchange_LMP_Map( map, autoDraw ) {
             html += '<a href="' + data.link + '">'
         }
         if ( undefined != data.title ) {
-            html += '<h5 class="map__popup__title">' + data.title + '</h5>';
+            var titleString = data.title;
+            if ( undefined != data.country ) {
+                titleString += '<span class="map__popup__title__addition">' + data.country.toUpperCase() + '</span>';
+            }
+            html += '<h5 class="map__popup__title">' + titleString + '</h5>';
         }
         if ( undefined != data.link ) {
             html += '</a>';
         }
+
         if ( undefined != data.partners ) {
             html += '<ul class="participants">'
             data.partners.map( function( p ) {
@@ -95,9 +135,46 @@ function Exchange_LMP_Map( map, autoDraw ) {
             html += '</ul>';
         }
         html += '</div></div>';
+        if ( undefined != data.participant_type ) {
+            html += '</div>';
+        }
         
         return html;
     }
+    this.createMarker = function( participant ) {
+        if ( participant.locations == undefined ) {
+            return false;
+        }
+        var markerClass = '';
+        if ( undefined != participant.locations[0].participant_type ) {
+            markerClass += ' ' + participant.locations[0].participant_type;
+        }
+        var iconHtml = '<div class="map__marker__image' + markerClass + '" style="background-image: url(' + iconUrl + '); background-size: 100% auto;"></div>';
+        var marker = L.marker( participant.locations[0].latlngs, {
+            icon : new L.DivIcon({
+                className: 'map__marker',
+                html:   iconHtml
+            })
+        });
+        marker.exchangeDetails = {
+            title: participant.title,
+            link: participant.link,
+            image: participant.image,
+            country: participant.locations[0].country,
+            type: participant.locations[0].participant_type
+        }
+        if ( marker ) {
+            marker.exchangeDetails.popup = L.popup({
+            maxWidth: 400,
+            minWidth: 250,
+        }).setContent( LMP_Map.createPopup( marker.exchangeDetails ), {
+                className : "map__popup"
+            } );
+            marker.bindPopup( marker.exchangeDetails.popup );
+            return marker;
+        }
+    }
+
     this.createNewerRoute = function( collaboration ) {
         var markers = L.featureGroup(),
         leaflet_ids = [];
@@ -141,7 +218,10 @@ function Exchange_LMP_Map( map, autoDraw ) {
             }
         }
 
-        markers.exchangeDetails.popup = L.popup().setContent( LMP_Map.createPopup( markers.exchangeDetails ), {
+        markers.exchangeDetails.popup = L.popup({
+            maxWidth: 400,
+            minWidth: 300,
+        }).setContent( LMP_Map.createPopup( markers.exchangeDetails ), {
             className : "map__popup"
         } );
         if ( markers.exchangeDetails.partners.length > 1 ) {
@@ -162,9 +242,17 @@ function Exchange_LMP_Map( map, autoDraw ) {
         }
 
         if ( leafletObjectInstance.map_markers && leafletObjectInstance.map_markers.length > 0 ) {
-        
+            for ( var i = 0; leafletObjectInstance.map_markers.length > i; i++ ) {
+                var marker = LMP_Map.createMarker( leafletObjectInstance.map_markers[i] );
+                var addMe = true;
+                if ( ! marker || marker.getLatLng().lat == 0 || marker.getLatLng() == 0 ) {
+                    addMe = false;
+                }
+                if ( addMe ) {
+                    mappableObjects.push( marker );
+                }
+            }   
         }
-
         if ( leafletObjectInstance.map_polylines && leafletObjectInstance.map_polylines.length > 0 ) {
             for ( var i = 0; leafletObjectInstance.map_polylines.length > i; i++ ) {
                 var cluster = LMP_Map.createNewerRoute( leafletObjectInstance.map_polylines[i] );
@@ -201,14 +289,9 @@ function Exchange_LMP_Map( map, autoDraw ) {
             iconUrl = leaflet_vars.leaflet_icon_url;
             lineColor = leaflet_vars.leaflet_line_color;
         }
-        LMP_Map.map.getContainer().classList.remove('focus');
+        //LMP_Map.map.getContainer().classList.remove('focus');
         if ( LMP_Map.clusterLayer == undefined ) {
-            LMP_Map.clusterLayer = new L.markerClusterGroup({
-                showCoverageOnHover : false,
-                spiderLegPolylineOptions : {
-                    color : lineColor
-                }
-            });
+            LMP_Map.clusterLayer = new L.markerClusterGroup( clusterMarkerOptions );
         } else {
             LMP_Map.clusterLayer.clearLayers();
         }
@@ -228,8 +311,8 @@ function Exchange_LMP_Map( map, autoDraw ) {
         });
         LMP_Map.map.addLayer( LMP_Map.networkLayer );
         LMP_Map.map.whenReady( function() {
-            this.addLayer( LMP_Map.clusterLayer )
-                .fitBounds( LMP_Map.clusterLayer.getBounds().pad(0.033) );
+            LMP_Map.map.addLayer( LMP_Map.clusterLayer );
+            LMP_Map.map.fitBounds( LMP_Map.clusterLayer.getBounds().pad(0.033) );
         })
     };
     this.prepareNetworkLayer = function( layer ) {
@@ -255,7 +338,7 @@ function Exchange_LMP_Map( map, autoDraw ) {
                     if ( LMP_Map.networkShowing ) {
                         LMP_Map.map.removeLayer( LMP_Map.networkLayer );
                         LMP_Map.map.addLayer( LMP_Map.clusterLayer );
-                        LMP_Map.map.getContainer().classList.remove('focus');
+                        //LMP_Map.map.getContainer().classList.remove('focus');
                         LMP_Map.networkShowing = 0;
                     }
                 })
@@ -271,7 +354,7 @@ function Exchange_LMP_Map( map, autoDraw ) {
             .addLayer( LMP_Map.networkLayer )
             .flyToBounds( LMP_Map.networkLayer.getBounds().pad( 0.033 ) )
             .once('moveend', function( e ) {
-                LMP_Map.map.getContainer().classList.add('focus');
+                //LMP_Map.map.getContainer().classList.add('focus');
                 LMP_Map.showNetwork( layer, false );
                 LMP_Map.networkShowing = 1;
             });
