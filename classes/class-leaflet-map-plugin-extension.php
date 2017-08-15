@@ -377,6 +377,17 @@ if ( ! class_exists( 'Leaflet_Map_Plugin_Extension' ) ) {
         }
 
         public function script_and_style_hooks() {
+
+
+            $js_url = get_option('leaflet_js_url',  plugins_url('../assets/js/leaflet.js') );
+            $css_url = get_option('leaflet_css_url',  plugins_url('../assets/css/leaflet.css') );
+
+            wp_deregister_style('leaflet_stylesheet');
+            wp_deregister_script('leaflet_js');
+
+            wp_register_style('leaflet_stylesheet', $css_url , Array(), null, false);
+            wp_register_script('leaflet_js', $js_url, Array(), null, false);
+
             wp_register_script('leaflet_markercluster_js', plugins_url( '../assets/js/leaflet.markercluster.js', __FILE__ ), array('leaflet_js'), false, true);
             wp_register_script('leaflet_snake_js', plugins_url( '../assets/js/L.Polyline.SnakeAnim.js', __FILE__ ), array('leaflet_js'), false, true);
             wp_register_script('leaflet_create_route_js', plugins_url( '../assets/js/create-route-leaflet-map.js', __FILE__ ), array('leaflet_js','leaflet_snake_js'), false, true);
