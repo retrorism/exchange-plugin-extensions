@@ -259,7 +259,9 @@ function Exchange_LMP_Map( map, autoDraw ) {
                 if ( cluster.hasOwnProperty( '_layers' ) ) {
                     var addMe = true;
                     cluster.eachLayer( function( layer ) {
-                        if ( layer.getLatLng().lat == 0 || layer.getLatLng() == 0 ) {
+                        if ( layer.getLatLng() == undefined 
+                            || layer.getLatLng().lat == 0 
+                            || layer.getLatLng() == 0 ) {
                             addMe = false;
                         }
                     });
