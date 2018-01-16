@@ -305,7 +305,7 @@ function Exchange_LMP_Map( map, autoDraw ) {
         LMP_Map.network = {};
         LMP_Map.networkShowing = 0;
         var groups = LMP_Map.createMapLayers( leafletObjectInstance );
-        if ( groups.length > 0 ) {
+        if ( groups !== undefined && groups.length > 0 ) {
             LMP_Map.clusterLayer.addLayers( groups );
         }
         LMP_Map.clusterLayer.eachLayer( function( layer ) {
