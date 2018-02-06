@@ -530,6 +530,7 @@ if ( ! class_exists( 'Leaflet_Map_Plugin_Extension' ) ) {
             $auto_draw = isset( $atts['auto_draw'] ) ? 'true' : 'false';
             $layers_script = "<script>
                 WPLeafletMapPlugin.add( function() {
+
                     var map = WPLeafletMapPlugin.getCurrentMap();
                     if ( typeof leaflet_vars.hashes !== 'Array' ) {
                         leaflet_vars.leaflet_hashes = [];
@@ -542,6 +543,9 @@ if ( ! class_exists( 'Leaflet_Map_Plugin_Extension' ) ) {
                         };
                         leaflet_vars.leaflet_hashes.push( hashMapPair );
                     }
+
+                    jQuery( document ).trigger( 'lmp-loaded' );
+
                 })
             </script>";
             return $layers_script;      

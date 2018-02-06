@@ -15,7 +15,13 @@ if ( Exchange.PluginExtensions == undefined ) {
 if ( Exchange.PluginExtensions.LMP == undefined ) {
     Exchange.PluginExtensions.LMP = {
         maps : {},
+        isInitiated : false,
         init : function() {
+
+            if ( Exchange.PluginExtensions.LMP.isInitiated ) {
+                return;
+            }
+
             hashMapPairs = leaflet_vars.leaflet_hashes;
 
             if ( hashMapPairs.length > 0 ) {
@@ -30,6 +36,8 @@ if ( Exchange.PluginExtensions.LMP == undefined ) {
                     }
                 }
             }
+
+            Exchange.PluginExtensions.LMP.isInitiated = true;
         }
     }
 }
